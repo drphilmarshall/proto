@@ -1,3 +1,5 @@
 2011-04-25 (Monday) 16:42 CEST
 
 Notes on lensed quasar search. Started at MPIA by PJM and EPM.
+
+25.01.11 Eric learns git/github
