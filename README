@@ -1,0 +1,33 @@
+
+
+                                  PROTO
+
+                        PanSTARRS Rare Object TOols
+
+                         Morganson & Marshall 2011
+
+
+This is a loose collection of data-handling utilities put together at MPIA for
+use by anyone in the PS1SC to search for rare objects, particularly in the 3pi
+survey. 
+
+The basic sequence of operations is:
+
+  * Execute a dvo query script to select objects or sources with "avextract"
+    or "mextract", and write the data to text file. At MPIA, this query may 
+    include requests for columns from other surveys' databases (eq SDSS, WISE,
+    2MASS, UKIDSS etc).
+    
+  * Optionally repackage this file as a FITS table
+
+  * Perform further cuts / apply weights, to refine selection, generating 
+    child tables.
+    
+  * Request postage stamp images of selected objects from Hawaii, via the
+    postage stamp server.
+
+  * Display information about each object, including:
+      * Light curve statistics and graph
+      * Postage stamps, colour or greyscale single filter
+      * Webpages containing the above
+      
