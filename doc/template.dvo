@@ -1,0 +1,52 @@
+#!/usr/bin/env dvo
+#=======================================================================
+#+
+# NAME:
+#   proto_xxxx.dvo
+#
+# PURPOSE:
+#   xxxx xxxx xxxxx xxxxx
+#
+# USAGE:
+#
+#   proto_xxxx.dvo [flags] [options] arguments
+#
+# INPUTS:
+#   xxx             xxxxx xxxxx
+#   xxx             xxxxx xxxxx
+#
+# FLAGS:
+#   -x              xxxxx xxxxx
+#   -x              xxxxx xxxxx
+#
+# OPTIONAL INPUTS:
+#   -x xxxx         xxxxx xxxxx
+#   -x xxxx         xxxxx xxxxx
+#   -h --help
+#
+# OUTPUTS:
+#   xxx             xxxxx xxxxx
+#   xxx             xxxxx xxxxx
+#
+# EXAMPLES:
+#   xxx xxxxxx xxxx:
+#   >> proto_xxxx.dvo -x xxx -x xxxx
+# 
+# DEPENDENCIES:
+#   xxxx            xxxxx xxxxx
+#
+# COMMENTS:
+#   - xxx xxxx xxx xxxx
+#   - xxx xxxx xxx xxxx
+#
+# BUGS:
+#   - xxx xxxx xxx xxxx
+#   - xxx xxxx xxx xxxx
+#
+# REVISION HISTORY:
+#   2011-04-XX  started Xxxxxxx (MPIA)
+#-
+#=======================================================================
+
+
+#=======================================================================
