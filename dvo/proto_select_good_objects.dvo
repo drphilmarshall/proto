@@ -1,0 +1,66 @@
+#!/usr/bin/env dvo
+#=======================================================================
+#+
+# NAME:
+#   proto_select_good_objects.dvo
+#
+# PURPOSE:
+#   Return level 0 catalog of good objects, ie ones well-detected in
+#   both SDSS DRn and PS1 3pi
+#
+# USAGE:
+#
+#   proto_select_good_objects.dvo [flags] [options] arguments
+#
+# INPUTS:
+#   xxx             xxxxx xxxxx
+#   xxx             xxxxx xxxxx
+#
+# FLAGS:
+#   -x              xxxxx xxxxx
+#   -x              xxxxx xxxxx
+#
+# OPTIONAL INPUTS:
+#   -x xxxx         xxxxx xxxxx
+#   -x xxxx         xxxxx xxxxx
+#   -h --help
+#
+# OUTPUTS:
+#   xxx             xxxxx xxxxx
+#   xxx             xxxxx xxxxx
+#
+# EXAMPLES:
+#   xxx xxxxxx xxxx:
+#   >> proto_select_good_objects.dvo -x xxx -x xxxx
+# 
+# DEPENDENCIES:
+#   xxxx            xxxxx xxxxx
+#
+# COMMENTS:
+#   - xxx xxxx xxx xxxx
+#   - xxx xxxx xxx xxxx
+#
+# BUGS:
+#   - usage printing uses redundant echo lines. Print script header?
+#
+# REVISION HISTORY:
+#   2011-04-28  started Morganson (MPIA)
+#-
+#=======================================================================
+
+if ( $argv:n != 6 )
+  echo "USAGE: PROTO_SELECT_GOOD_OBJECTS.dvo catdir outfile ramin ramax decmin decmax"
+  echo "outfile is a complete avextract for good sources in your radec box"
+  echo "good sources have r:err < .1, r_SDSS:err < .1, g:err < .1, g_SDSS:err < .1, not flagged as bad"
+  exit 1
+end
+
+catdir $argv:0
+
+avextract -skyregion $argv:2 $argv:3 $argv:4 $argv:5 catID objID ra dec g g:err r r:err i i:err z z:err y y:err u_SDSS u_SDSS:err g_SDSS g_SDSS:err r_SDSS r_SDSS:err i_SDSS i_SDSS:err z_SDSS z_SDSS:err g:ncode g:nphot r:ncode r:nphot i:ncode i:nphot z:ncode z:nphot y:ncode y:nphot objflags where ( (Nmeas > 1) && ( (( r_SDSS:err < .1 ) &&  ( r:err <.1 )) || (( g_SDSS:err < .1 ) &&  ( g:err <.1 ))) && (( objflags & 0x4000000 ) != 0) )
+
+write $argv:1 -f "%d %d %.5f %.5f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %d %d %d %d %d %d %d %d %d %d %x" catID objID ra dec g g:err r r:err i i:err z z:err y y:err u_SDSS u_SDSS:err g_SDSS g_SDSS:err r_SDSS r_SDSS:err i_SDSS i_SDSS:err z_SDSS z_SDSS:err g:ncode g:nphot r:ncode r:nphot i:ncode i:nphot z:ncode z:nphot y:ncode y:nphot objflags 
+
+exit 0
+
+#=======================================================================
