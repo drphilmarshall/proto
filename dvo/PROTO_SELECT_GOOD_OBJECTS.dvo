@@ -1,0 +1,13 @@
+#!/usr/bin/env dvo
+if ($argv:n != 6 )
+  echo "USAGE: PROTO_SELECT_GOOD_OBJECTS.dvo catdir outfile ramin ramax decmin decmax"
+  echo "outfile is a complete avetract for good sources in your radec box"
+  echo "good sources have r:err < .1, r_SDSS:err < .1, g:err < .1, g_SDSS:err < .1, not flagged as bad"
+  exit 1
+end
+catdir $argv:0
+avextract -skyregion $argv:2 $argv:3 $argv:4 $argv:5 catID objID ra dec g g:err r r:err i i:err z z:err y y:err u_SDSS u_SDSS:err g_SDSS g_SDSS:err r_SDSS r_SDSS:err i_SDSS i_SDSS:err z_SDSS z_SDSS:err g:ncode g:nphot r:ncode r:nphot i:ncode i:nphot z:ncode z:nphot y:ncode y:nphot objflags where ( (Nmeas > 1) && ( (( r_SDSS:err < .1 ) &&  ( r:err <.1 )) || (( g_SDSS:err < .1 ) &&  ( g:err <.1 ))) && (( objflags & 0x4000000 ) != 0) )
+
+write $argv:1 -f "%d %d %.5f %.5f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %d %d %d %d %d %d %d %d %d %d %x" catID objID ra dec g g:err r r:err i i:err z z:err y y:err u_SDSS u_SDSS:err g_SDSS g_SDSS:err r_SDSS r_SDSS:err i_SDSS i_SDSS:err z_SDSS z_SDSS:err g:ncode g:nphot r:ncode r:nphot i:ncode i:nphot z:ncode z:nphot y:ncode y:nphot objflags 
+
+exit 0
