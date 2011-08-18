@@ -7,8 +7,10 @@ import numpy,sys,os,getopt,atpy
 
 import proto
 
-# BUG: this import fails
 from astrometry.libkd.spherematch import *
+
+# BUG: this import can fail, with the wrong environment... Some conflict between scisoft, atpy and astrometry?
+
 # Traceback (most recent call last):
 #   File "<stdin>", line 1, in <module>
 #   File "/Users/marshallp/work/astrometry/python/astrometry/libkd/spherematch.py", line 1, in <module>
@@ -134,7 +136,7 @@ def proto_apcluster(argv):
     t.clusID[b] = ID
     ID += 1
   
-  # Check clustered objects are in clusters:
+  # Count clusters:
   
   Nclusters = len(numpy.unique(t.clusID[numpy.where(t.clusID > 0)[0]]))
 
