@@ -114,8 +114,16 @@ def proto_rgb(argv):
   hdulist.close()
 
   # Plot from a*sigma to b*sigma, using each channel's sigma
-  a = 0.5
-  b = 8
+  a = -3
+  b = 200
+  vmin_r,vmax_r=a*redstats['stdev'],  b*redstats['stdev'], 
+  vmin_g,vmax_g=a*greenstats['stdev'],b*greenstats['stdev'], 
+  vmin_b,vmax_b=a*bluestats['stdev'], b*bluestats['stdev'], 
+
+  # Alternatiively:
+  vmin_r,vmax_r=-10,500 
+  vmin_g,vmax_g=-10,500 
+  vmin_b,vmax_b=-10,500 
 
   # Set up output filename:
   output = name+'_rgb.png'
@@ -123,9 +131,9 @@ def proto_rgb(argv):
   # Call aplply:
   
   pmin,pmax = 50.0,99.0
-  stretch = 'linear'
-  mid = None
-  
+  stretch = 'arcsinh'
+  mid = 100.0
+
 #   aplpy.make_rgb_image([redfile,greenfile,bluefile],output,
 #                        pmin_r=pmin, pmax_r=pmax, 
 #                          stretch_r=stretch, vmid_r=mid, 
@@ -135,11 +143,11 @@ def proto_rgb(argv):
 #                          stretch_b=stretch, vmid_b=mid, )
 #   
   aplpy.make_rgb_image([redfile,greenfile,bluefile],output,
-                       vmin_r=a*redstats['stdev'], vmax_r=b*redstats['stdev'], 
+                       vmin_r=vmin_r, vmax_r=vmax_r, 
                          stretch_r=stretch, vmid_r=mid, 
-                       vmin_g=a*greenstats['stdev'], vmax_g=b*greenstats['stdev'], 
+                       vmin_g=vmin_g, vmax_g=vmax_g, 
                          stretch_g=stretch, vmid_g=mid, 
-                       vmin_b=a*bluestats['stdev'], vmax_b=b*bluestats['stdev'], 
+                       vmin_b=vmin_b, vmax_b=vmax_b, 
                          stretch_b=stretch, vmid_b=mid, )
   
   # See http://aplpy.github.com/documentation/api.html#rgb-images for

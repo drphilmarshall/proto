@@ -1,5 +1,10 @@
 # ======================================================================
+# General-purpose photometry functions.
 
+# Copyright 2011 Phil Marshall (Oxford) and Eric Morganson (MPIA).
+# All rights reserved (for now).
+
+# ======================================================================
 # Required modules:
 
 import numpy
@@ -55,6 +60,7 @@ def imagestats(masterimage,clip=3,acc=0.01):
   image = image[subset]
   
   # Initialise stats:
+  # BUG! This craps out if there are nan's in the image... eg for PS1!
   mean = numpy.average(image)
   stdev = numpy.std(image)
   nsigma = 100*acc

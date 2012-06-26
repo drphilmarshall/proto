@@ -1,4 +1,5 @@
 # ======================================================================
+# General-purpose astrometry functions.
 
 # Required modules:
 
@@ -10,11 +11,19 @@ import numpy
 def pixscale(hdr):
 
   cd = numpy.zeros([2,2])
-  cd[0,0] = hdr['CD1_1']
-  cd[0,1] = hdr['CD1_2']
-  cd[1,0] = hdr['CD2_1']
-  cd[1,1] = hdr['CD2_2']
-  cell = numpy.sqrt(abs(numpy.linalg.det(cd)))*3600.0
+  
+# eg PS1 data:
+  if hdr.has_key('CDELT1') :
+    cell = numpy.sqrt(hdr['CDELT1']*hdr['CDELT1'])
+# eg SDSS data:
+  else :
+    cd[0,0] = hdr['CD1_1']
+    cd[0,1] = hdr['CD1_2']
+    cd[1,0] = hdr['CD2_1']
+    cd[1,1] = hdr['CD2_2']
+    cell = numpy.sqrt(abs(numpy.linalg.det(cd)))
+    
+  cell *= 3600.0  
 
   return cell
 

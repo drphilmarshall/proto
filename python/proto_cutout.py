@@ -3,7 +3,7 @@
 
 # Globally useful modules:
 
-import numpy,sys,os,getopt,pyfits,pywcs
+import numpy,sys,os,getopt,pyfits,pywcs,string
 
 import proto
 
@@ -22,7 +22,7 @@ def proto_cutout(argv):
   COMMENTS
     
   USAGE
-    proto_cutout.py [flags] [options]  ra  dec  w  image1 image2 image2
+    proto_cutout.py [flags] [options]  ra  dec  w  image1 image2 image3 ...
 
   FLAGS
           -h             Print this message
@@ -36,6 +36,7 @@ def proto_cutout(argv):
 
   OPTIONAL INPUTS
           -n name        Name to prefix output filenames with
+          -s suffix      Suffix for output filenames [sci]
           
   OUTPUTS
           cutout1, etc.  Cutout images
@@ -65,7 +66,7 @@ def proto_cutout(argv):
   # --------------------------------------------------------------------
 
   try:
-      opts, args = getopt.getopt(argv, "hvbn:", ["help","verbose","name="])
+      opts, args = getopt.getopt(argv, "hvbs:n:", ["help","verbose","suffix=","name="])
   except getopt.GetoptError, err:
       # print help information and exit:
       print str(err) # will print something like "option -a not recognized"
@@ -75,6 +76,7 @@ def proto_cutout(argv):
   vb = False
   backsub = False
   name = 'cutout'
+  suffix = 'sci'
   for o,a in opts:
       if o in ("-v", "--verbose"):
           vb = True
@@ -85,6 +87,8 @@ def proto_cutout(argv):
           backsub = True
       elif o in ("-n", "--name"):
           name = a
+      elif o in ("-s", "--suffix"):
+          suffix = a
       else:
           assert False, "unhandled option"
    
@@ -111,8 +115,14 @@ def proto_cutout(argv):
 
     # Read in image header:
     hdulist = pyfits.open(input)
-    hdr = hdulist[0].header
-    if vb: print "Read in header from ",input
+    # Check for empty extension, if so advance to next extension:
+    k,NAXIS = -1,0
+    while NAXIS == 0 :
+      k += 1
+      hdr = hdulist[k].header
+      NAXIS = hdr['NAXIS']
+
+    if vb: print "Read in header from extension",k,"of",input
     
     # Read WCS, and measure pixel scale:
     wcs = pywcs.WCS(hdr)
@@ -148,11 +158,11 @@ def proto_cutout(argv):
       
       # Make cutout, centred on iw/2:
       cutout = numpy.zeros([iw,iw])
-      cutout[jmin:jmax,imin:imax] = hdulist[0].data[j1:j2,i1:i2]
+      cutout[jmin:jmax,imin:imax] = hdulist[k].data[j1:j2,i1:i2]
       
       # Subtract background:
       if backsub:
-        image = hdulist[0].data
+        image = hdulist[k].data
         stats = proto.imagestats(image,clip=3)
         back = stats['median']
         if vb: print "Subtracting constant background:",back
@@ -166,29 +176,71 @@ def proto_cutout(argv):
       if vb: print "Switching to one-indexing,"
       if vb: print "Cutout central pixel:",x0,y0
       # BUG: this is only accurate to ~0.5 pixels with SDSS cutouts, due to 
-      # more complex astrometric transformation... Ho hum.
+      # more complex astrometric transformation?
+      # Hogg: should really only change CRPIX and keep old CRVAL...
       
+      ox0 = hdr['CRPIX1']
       hdr['CRPIX1'] = x0
+      oy0 = hdr['CRPIX2']
       hdr['CRPIX2'] = y0
+      ora0 = hdr['CRVAL1']
       hdr['CRVAL1'] = ra0
+      odec0 = hdr['CRVAL2']
       hdr['CRVAL2'] = dec0
       hdr['NAXIS1'] = iw
       hdr['NAXIS2'] = iw
-
-      # and then set up filename:
       
-      filter = hdr['FILTER']
+      # Also need to set dtype of array and adjust bitpix to match:
+      cutout.astype(float)
+      hdr['BITPIX'] = -64
+#       print isinstance(cutout,numpy.ndarray) 
+
+      # Add some comments and keywords at the end:
+      infile = string.split(input,'/')[-1]
+      hdr.update("OFILE", infile, "")     
+      hdr.update("OCRVAL1", ora0, "Original CRVAL1")     
+      hdr.update("OCRVAL2", odec0, "Original CRVAL2")
+      hdr.update("OCRPIX1", ox0, "Original CRPIX1")     
+      hdr.update("OCRPIX2", oy0, "Original CRPIX2")
+      hdr.add_comment("Cutout image made by proto_cutout.py",before='OFILE')
+      hdr.add_comment("P.J. Marshall, August 2011",before='OFILE')
+      
+      # Now set up filename:
+            
+      if hdr.has_key('PSCAMERA') :
+        # PS1 data:
+        filter = hdr['HIERARCH FPA.FILTER']
+        filter = string.split(filter,'.')[0]
+        MJD = hdr['MJD-OBS']
+      else :
+        filter = hdr['FILTER']
+        MJD = hdr['MJD']
+        
+      MJDstring = "%.5f" % MJD
+      
+      # May want to convert MJD to Gregorian date sometime...
+      # http://www.atnf.csiro.au/people/Enno.Middelberg/python/jd2gd.py
+    
       sw = str(int(w))
-      output = name+'_'+sw+'x'+sw+'arcsec_'+filter+'_sci.fits'
+      output = name+'_'+sw+'x'+sw+'arcsec_'+MJDstring+'_'+filter+'_'+suffix+'.fits'
 
       # Write out cutout image to output file:
 
       if vb: print "Writing cutout image to ",output
 
       if os.path.exists(output): os.remove(output) 
-      pyfits.writeto(output,cutout,hdr)
-
+      
+      # Write from scratch, binning first blank extension!
+      hdu = pyfits.PrimaryHDU()
+      hdu.header = hdr
+      hdu.data = cutout
+      hdu.verify()
+      
+      hdu.writeto(output)
+      
       if vb: print "Done with",input
+          
+      if not vb: print output
           
     else:
       if vb: print "Object centre is not in footprint of image, skipping"
