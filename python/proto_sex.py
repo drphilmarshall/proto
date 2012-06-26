@@ -151,9 +151,11 @@ def proto_sex(argv):
    
    # -------------------------------------------------------------------------
    
-   # Clean catalog here!
+   # Clean catalog with flags:
    
    
+   # Rename columns to match PS1 measurements:
+   # t.rename_column('time','space')
    
    # Write out table to output file:
    if vb: print "Writing catalog to ",outputfile
