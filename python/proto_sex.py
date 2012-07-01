@@ -134,7 +134,7 @@ def proto_sex(argv):
       if vb: print "Extracted",len(catalog),"sources from "+scifile
       
       # Add columns containing MJD and filter:
-      catalog = paste_column(catalog,'mjdobs',numpy.array([MJD]),fill='copy')
+      catalog = paste_column(catalog,'mjd_obs',numpy.array([MJD]),fill='copy')
       catalog = paste_column(catalog,'filterid',numpy.array([filter]),fill='copy')
       
       # Concatenate this catalog into the master catalog
@@ -206,11 +206,27 @@ def call_sextractor(zpt,gain,scifile,whtfile=None):
    command = 'sex -c '+sexfile
    if whtfile:
      command += ' -WEIGHT_TYPE MAP_VAR -WEIGHT_IMAGE '+whtfile
-   command += ' '+scifile  
+   command += ' '+scifile+' >& /dev/null'
    subprocess.call(command, shell=True)
    
    # Read in table:
    table = atpy.Table(catfile,type='fits',hdu=2)
+      
+   # Rename columns to match PS1 names:
+   
+   table.rename_column('ALPHA_J2000','ra')   
+   table.rename_column('DELTA_J2000','dec')   
+   table.rename_column('X2_WORLD','moments_xx')   
+   table.rename_column('XY_WORLD','moments_xy')   
+   table.rename_column('Y2_WORLD','moments_yy')   
+   table.rename_column('FLUX_AUTO','kron_flux')   
+   table.rename_column('FLUXERR_AUTO','kron_flux_err')
+   # Note: Kron mags are missing from PS1 IPP catalogs...
+   #   Thing we use is "cal_psf_mag" which is actually something quite
+   #   different. Best to use fluxes not mags?   
+   table.rename_column('MAG_AUTO','kron_mag')   
+   table.rename_column('MAGERR_AUTO','kron_mag_err')   
+   table.rename_column('FLAGS','flags')   
       
    # Clean up:
    if tidy:
