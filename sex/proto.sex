@@ -13,7 +13,7 @@ PARAMETERS_NAME  xxxPARFILE     # name of the file containing catalog contents
 #------------------------------- Extraction ----------------------------------
  
 DETECT_TYPE      CCD            # CCD (linear) or PHOTO (with gamma correction)
-DETECT_MINAREA   3              # minimum number of pixels above threshold
+DETECT_MINAREA   1              # minimum number of pixels above threshold
 DETECT_THRESH    5              # <sigmas> or <threshold>,<ZP> in mag.arcsec-2
 ANALYSIS_THRESH  5              # <sigmas> or <threshold>,<ZP> in mag.arcsec-2
  

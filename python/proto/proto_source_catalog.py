@@ -11,7 +11,7 @@ import sys,numpy,atpy
 
 # Global variables:
 
-filterids = numpy.array(['g.0000','r.0000','i.0000','z.0000','y.0000'])
+filterids = numpy.array(['g.00000','r.00000','i.00000','z.00000','y.00000'])
 bands = numpy.array(['g','r','i','z','y'])
 plotcolors = numpy.array(['blue','green','orange','red','magenta'])
 
@@ -61,7 +61,8 @@ class proto_source_catalog:
     def __init__(self, filename):
         
         self.catalog = filename
-        self.table = atpy.Table(filename,type='fits')
+        # self.table = atpy.Table(filename,type='fits')
+        self.table = atpy.Table(filename)
         self.number = len(self.table)  
         
         self.name = 'PS1 source list'
@@ -69,18 +70,20 @@ class proto_source_catalog:
         # Don't compute ellipticity parameters until asked to do so:
         self.done_ellipticities = False
            
-        # Always want bands (filter strings are long and annoying...
+        # Always want bands, as filter strings are long and annoying...
         # Might as well assign plot colors as we go!
         self.table.add_empty_column('band', 'a1')
         self.table.add_empty_column('plotcolor', 'a25')
         
+        # Strip filter name into band:
+        self.table.band = [f[0] for f in self.table.filterid]
+       
         # Loop over filterids - must be better way to do this...
-        for i in range(len(filterids)):
-            index = numpy.where(self.table['filterid'] == filterids[i])
+        for i in range(len(bands)):
+            index = numpy.where(self.table['band'] == bands[i])
             if len(index) > 0:
                 self.table.plotcolor[index] = plotcolors[i]
-                print i, plotcolors[i], index, self.table.plotcolor[index]
-                self.table.band[index] = bands[i]
+                # print i, plotcolors[i], index, self.table.plotcolor[index]
                 
         return None
 

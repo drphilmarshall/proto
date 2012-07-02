@@ -27,10 +27,9 @@ def proto_make_source_regions(argv):
     assumed to be for a particular patch of sky. Use MJDobs and filter values 
     to make regions for each source in each observation.
     Display each source as an ellipse with second moments as in the catalog, 
-    coloured by filter (and shaded by flux?). 
-    PSF FWHM is shown in the bottom  left hand corner, object name in the top
-    left hand corner,  central ra and dec are shown in the top right hand 
-    corner. MJD and filter are in the bottom righthand corner. 
+    coloured by filter. 
+    Object name is shown in the top left hand corner, MJD and filter are in 
+    the bottom lefthand corner. Colour coding by filter.
     
   USAGE
     proto_make_source_regions.py [flags] [options] catalog.fits

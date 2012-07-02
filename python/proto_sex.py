@@ -46,6 +46,7 @@ def proto_sex(argv):
      pyfits, ATpy, SExtractor
 
    BUGS
+     - moments/ellipticities may be either wrong or badly interpreted
 
    HISTORY
      2012-06-26 started Marshall (Oxford)      
@@ -64,6 +65,11 @@ def proto_sex(argv):
    vb = False
    backsub = False
    name = 'source_catalog'
+   
+   # outtype = 'fits'
+   # outtype = 'ascii'
+   outtype = 'ipac'
+   
    for o,a in opts:
        if o in ("-v", "--verbose"):
            vb = True
@@ -77,7 +83,7 @@ def proto_sex(argv):
 
    if len(args) > 0 :
        inputfiles = (args[:])
-       outputfile = name+'_sources.fits'
+       outputfile = name+'_sources.'+outtype
        if vb: 
          print " "
          print "Running SExtractor on the following input files:"
@@ -107,14 +113,14 @@ def proto_sex(argv):
 
       # Read WCS, and measure pixel scale:
       wcs = pywcs.WCS(hdr)
-      cell = proto.pixscale(hdr) 
-      # if vb: print "Pixel scale =",cell
+      pltscale = proto.pixscale(hdr) 
+      # if vb: print "Pixel scale =",pltscale
 
       # Extract filter, MJD, GAIN and zero point from FITS header:
       if hdr.has_key('PSCAMERA') :
         # PS1 data:
         filter = hdr['HIERARCH FPA.FILTER']
-        filter = string.split(filter,'.')[0]
+        # filter = string.split(filter,'.')[0]
         MJD = hdr['MJD-OBS']
         zpt = hdr['FPA.ZP']
         gain = hdr['HIERARCH CELL.GAIN']
@@ -129,13 +135,16 @@ def proto_sex(argv):
       varfile = find_whtfile(scifile,suffix='var')
 
       # Now call SExtractor, returning a table:
-      catalog = call_sextractor(zpt,gain,scifile,whtfile=varfile)
+      catalog = call_sextractor(zpt,gain,pltscale,scifile,whtfile=varfile)
       
       if vb: print "Extracted",len(catalog),"sources from "+scifile
       
-      # Add columns containing MJD and filter:
+      # Add columns containing MJD and filter, and platescale. Note position
+      # angle is zero because we measured moments in world coords:
       catalog = paste_column(catalog,'mjd_obs',numpy.array([MJD]),fill='copy')
       catalog = paste_column(catalog,'filterid',numpy.array([filter]),fill='copy')
+      catalog = paste_column(catalog,'pltscale',numpy.array([pltscale]),fill='copy')
+      catalog = paste_column(catalog,'posangle',numpy.array([0.0]),fill='copy')
       
       # Concatenate this catalog into the master catalog
       if first:
@@ -150,13 +159,7 @@ def proto_sex(argv):
    # End of loop over inputfiles.
    
    # -------------------------------------------------------------------------
-   
-   # Clean catalog with flags:
-   
-   
-   # Rename columns to match PS1 measurements:
-   # t.rename_column('time','space')
-   
+         
    # Write out table to output file:
    if vb: print "Writing catalog to ",outputfile
 
@@ -165,16 +168,16 @@ def proto_sex(argv):
    master.add_comment("P.J. Marshall, June 2012")
 
    if os.path.exists(outputfile): os.remove(outputfile) 
-   master.write(outputfile,type='FITS')                      
+   master.write(outputfile,type=outtype)                      
 
    return
 
 # ======================================================================
 # Set up and run SExtractor:
 
-def call_sextractor(zpt,gain,scifile,whtfile=None):
+def call_sextractor(zpt,gain,pltscale,scifile,whtfile=None):
    
-   tidy = False
+   tidy = True
    
    # Make a config file:
    catfile = scifile.replace('sci.fits','sources.fits')
@@ -213,9 +216,10 @@ def call_sextractor(zpt,gain,scifile,whtfile=None):
    table = atpy.Table(catfile,type='fits',hdu=2)
       
    # Rename columns to match PS1 names:
-   
    table.rename_column('ALPHA_J2000','ra')   
    table.rename_column('DELTA_J2000','dec')   
+   table.rename_column('X_IMAGE','x')   
+   table.rename_column('Y_IMAGE','y')   
    table.rename_column('X2_WORLD','moments_xx')   
    table.rename_column('XY_WORLD','moments_xy')   
    table.rename_column('Y2_WORLD','moments_yy')   
@@ -228,6 +232,15 @@ def call_sextractor(zpt,gain,scifile,whtfile=None):
    table.rename_column('MAGERR_AUTO','kron_mag_err')   
    table.rename_column('FLAGS','flags')   
       
+   # Convert moments to pixels:
+   scale = (3600.0*3600.0)/(pltscale*pltscale)
+   table.moments_xx *= scale
+   table.moments_xy *= scale
+   table.moments_yy *= scale
+    
+   # Clean catalog with flags:
+   
+   
    # Clean up:
    if tidy:
       command = 'rm -f '+catfile+' '+defsexfile+' '+defparfile+' '+defconvfile
@@ -259,10 +272,10 @@ def paste_column(table,name,x,fill='zeros'):
          values[0:nx] = x
       elif fill == 'copy':
          values[0:nx] = x
-         values[nx+1:nt] = x[-1]
+         values[nx:nt] = x[-1]
    else:
       values = x.copy()
-      
+            
    table.add_column(name,values)
    
    return table
