@@ -13,13 +13,15 @@ PARAMETERS_NAME  xxxPARFILE     # name of the file containing catalog contents
 #------------------------------- Extraction ----------------------------------
  
 DETECT_TYPE      CCD            # CCD (linear) or PHOTO (with gamma correction)
-DETECT_MINAREA   1              # minimum number of pixels above threshold
-DETECT_THRESH    5              # <sigmas> or <threshold>,<ZP> in mag.arcsec-2
-ANALYSIS_THRESH  5              # <sigmas> or <threshold>,<ZP> in mag.arcsec-2
+DETECT_MINAREA   5              # minimum number of pixels above threshold
+DETECT_THRESH    4              # <sigmas> or <threshold>,<ZP> in mag.arcsec-2
+ANALYSIS_THRESH  4              # <sigmas> or <threshold>,<ZP> in mag.arcsec-2
  
-FILTER           N              # apply filter for detection (Y or N)?
-FILTER_NAME      default.conv   # name of the file containing the filter
- 
+FILTER           Y              # apply filter for detection (Y or N)?
+# FILTER_NAME      gauss_1.5_3x3.conv   # name of the file containing the filter
+# FILTER_NAME      mexhat_1.5_5x5.conv   # name of the file containing the filter
+FILTER_NAME      mexhat_2.5_7x7.conv   # name of the file containing the filter
+
 DEBLEND_NTHRESH  64             # Number of deblending sub-thresholds
 DEBLEND_MINCONT  0.00001        # Minimum contrast parameter for deblending
  
@@ -45,7 +47,7 @@ PIXEL_SCALE      0              # size of pixel in arcsec (0=use FITS WCS info)
  
 #------------------------- Star/Galaxy Separation ----------------------------
  
-SEEING_FWHM      0.9            # stellar FWHM in arcsec
+SEEING_FWHM      xxxFWHM        # stellar FWHM in arcsec
 STARNNW_NAME     default.nnw    # Neural-Network_Weight table filename
  
 #------------------------------ Background -----------------------------------

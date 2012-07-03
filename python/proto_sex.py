@@ -122,20 +122,24 @@ def proto_sex(argv):
         filter = hdr['HIERARCH FPA.FILTER']
         # filter = string.split(filter,'.')[0]
         MJD = hdr['MJD-OBS']
-        zpt = hdr['FPA.ZP']
+        zpt = hdr['HIERARCH FPA.ZP']
+        if zpt == 'NaN': zpt = 30.0  # HACK.
         gain = hdr['HIERARCH CELL.GAIN']
+        FWHM = hdr['HIERARCH CHIP.SEEING']*pltscale # in arcsec
+        if (FWHM <= 0 or FWHM > 100): FWHM = 0.999999 # red flag value
       else :
         filter = hdr['FILTER']
         MJD = hdr['MJD']
         zpt = hdr['MAGZERO']
         gain = hdr['GAIN']
+        FWHM = 0.9 # in arcsec
       MJDstring = "%.5f" % MJD
 
       # Find weight (var) file that goes with scifile:
       varfile = find_whtfile(scifile,suffix='var')
 
       # Now call SExtractor, returning a table:
-      catalog = call_sextractor(zpt,gain,pltscale,scifile,whtfile=varfile)
+      catalog = call_sextractor(zpt,gain,pltscale,FWHM,scifile,whtfile=varfile)
       
       if vb: print "Extracted",len(catalog),"sources from "+scifile
       
@@ -175,9 +179,9 @@ def proto_sex(argv):
 # ======================================================================
 # Set up and run SExtractor:
 
-def call_sextractor(zpt,gain,pltscale,scifile,whtfile=None):
+def call_sextractor(zpt,gain,pltscale,FWHM,scifile,whtfile=None):
    
-   tidy = True
+   tidy = False
    
    # Make a config file:
    catfile = scifile.replace('sci.fits','sources.fits')
@@ -193,13 +197,16 @@ def call_sextractor(zpt,gain,pltscale,scifile,whtfile=None):
       command = 'cp '+os.environ['PROTO_DIR']+'/sex/'+defparfile+' .'
       subprocess.call(command, shell=True)
    
-   defconvfile = 'default.conv'
+   # defconvfile = 'gauss_1.5_3x3.conv'
+   # defconvfile = 'mexhat_1.5_5x5.conv'
+   defconvfile = 'mexhat_2.5_7x7.conv'
    if not os.path.exists(defconvfile): 
       command = 'cp '+os.environ['PROTO_DIR']+'/sex/'+defconvfile+' .'
       subprocess.call(command, shell=True)
    
    command = 'cat '+defsexfile+' | sed s/xxxZPT/'+str(zpt)+'/g' \
                               +' | sed s/xxxGAIN/'+str(gain)+'/g' \
+                              +' | sed s/xxxFWHM/'+str(FWHM)+'/g' \
                               +' | sed s/xxxPARFILE/'+defparfile+'/g' \
                               +' | sed s/xxxCATALOG/'+catfile+'/g' \
                               +' > '+sexfile
@@ -209,6 +216,7 @@ def call_sextractor(zpt,gain,pltscale,scifile,whtfile=None):
    command = 'sex -c '+sexfile
    if whtfile:
      command += ' -WEIGHT_TYPE MAP_VAR -WEIGHT_IMAGE '+whtfile
+   # command += ' '+scifile
    command += ' '+scifile+' >& /dev/null'
    subprocess.call(command, shell=True)
    
@@ -218,8 +226,8 @@ def call_sextractor(zpt,gain,pltscale,scifile,whtfile=None):
    # Rename columns to match PS1 names:
    table.rename_column('ALPHA_J2000','ra')   
    table.rename_column('DELTA_J2000','dec')   
-   table.rename_column('X_IMAGE','x')   
-   table.rename_column('Y_IMAGE','y')   
+   # table.rename_column('X_IMAGE','x')   
+   # table.rename_column('Y_IMAGE','y')   
    table.rename_column('X2_WORLD','moments_xx')   
    table.rename_column('XY_WORLD','moments_xy')   
    table.rename_column('Y2_WORLD','moments_yy')   

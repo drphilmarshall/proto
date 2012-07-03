@@ -199,8 +199,8 @@ def proto_plot_sources(argv):
     
     # Turn off the axis ticks and labels:
     ax = pylab.gca()
-    ax.xaxis.set_major_formatter(pylab.NullFormatter())
-    ax.yaxis.set_major_formatter(pylab.NullFormatter())
+    ax.xaxis.set_ticks([])
+    ax.yaxis.set_ticks([])
 
     sources = [(source, 1.)]
     ns = []
@@ -251,6 +251,7 @@ def source_plot_ellipse(s,wcs,alpha=1.0):
 #     text = "%s" % s['flags']
 #     plt.text(x,y,text,color=color)
     
+#     # Debugging - compare with SExtractor image coords x and y:     
 #     x,y = s['x']-1.0,s['y']-1.0
 #     plt.plot([x],[y],'.',ms=2,color='b')
 #     
@@ -267,7 +268,8 @@ def source_plot_ellipse(s,wcs,alpha=1.0):
 
 def ellipse((x,y), (a, b), orientation=0, resolution=100, **kwargs):
 
-    phi = numpy.deg2rad(orientation+90.0)
+    # phi = numpy.deg2rad(orientation+90.0)
+    phi = numpy.deg2rad(orientation)
     theta = 2*numpy.pi*pylab.arange(resolution)/resolution
     xs = a * numpy.cos(theta)
     ys = b * numpy.sin(theta)
