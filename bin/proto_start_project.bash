@@ -5,7 +5,8 @@
 #   proto_start_project.bash
 #
 # PURPOSE:
-#   Start a search for rare objects.   
+#   Start a search for rare objects: set up works space, download postage stamps,
+#   organise stuff as it comes in.
 #
 # COMMENTS:
 # 
