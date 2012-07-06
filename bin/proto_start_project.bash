@@ -5,7 +5,7 @@
 #   proto_start_project.bash
 #
 # PURPOSE:
-#   Start a search for rare objects: set up works space, download postage stamps,
+#   Start a search for rare objects: set up workspace, download postage stamps,
 #   organise stuff as it comes in.
 #
 # COMMENTS:
@@ -16,14 +16,15 @@
 #      2) Call pstamp and start downloading postage stamp images
 #      3) Make small catalogs of PS1 detections to correspond to the images
 #   
-#   Here's the plan for the directory structure:
+#   Here's the plan for the directory structure - note the assumption of a correctly
+#   set up environment:
 #
 #      $PS1QLS_DATA_DIR/$search/catalogs  - contains search catalog, and then refinements
 #                                           including rabin, decbin of each target
 # 
 #      $PS1QLS_DATA_DIR/$search/$skypatch/$target - contains all products for each target
 #
-#   Nb. skypatches should be "square" and named ra1_dec1_ra2_dec2, eg 330_-20_340_-10
+#   Nb. skypatches will be "square" and named ra1_dec1_ra2_dec2, eg 330_-20_340_-10
 #   These can be of any size, with the patch width given as an argument to this script.
 #   We need a lookup table with target ra,dec,target,skypatch, placed in catalogs.
 # 
@@ -45,19 +46,21 @@
 #
 #
 # INPUTS:
-#   field         IAU name of HAGGLeS field for which to prepare workspace     
+#   catalog       Catalog of targets, plain text.      
 #
 # OPTIONAL INPUTS:
-#   -w         skypatch width in degrees [10]
+#   -w            skypatch width in degrees [10]
 #
 # OUTPUTS:
 #
 # EXAMPLES:
-#   proto_start_project.bash -w 20 SDSSknownlenses.txt
+#   proto_start_project.bash -w 20 examples/SDSSknownlenses.txt
 #
 # BUGS:
-#
-#
+#    - very large searches should have initial catalogs in FITS table format - in which case this script
+#      should really be in python.
+#    - THIS SCRIPT HAS NO FUNCTIONALITY YET
+# 
 # REVISION HISTORY:
 #   2012-07-04  started Marshall and Morganson (MPIA)
 #-
