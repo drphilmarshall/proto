@@ -49,33 +49,153 @@
 #   catalog       Catalog of targets, plain text.      
 #
 # OPTIONAL INPUTS:
-#   -w            skypatch width in degrees [10]
+#   -c            convert input from hms to radec (required if input is hms)
+#   -p            change project name [PSO] 
+#   -s            skypatch width in degrees [30]
 #
 # OUTPUTS:
 #
 # EXAMPLES:
-#   proto_start_project.bash -w 20 examples/SDSSknownlenses.txt
+#   proto_start_project.bash -w 20 examples/SDSSknownlenses.txt -p KNOWNLENSES
 #
 # BUGS:
 #    - very large searches should have initial catalogs in FITS table format - in which case this script
 #      should really be in python.
-#    - THIS SCRIPT HAS NO FUNCTIONALITY YET
+#    - Does not add lsd catalogs
 # 
 # REVISION HISTORY:
 #   2012-07-04  started Marshall and Morganson (MPIA)
+#   2012-07-20  made half functional by Morganson (MPIA)
 #-
 #===============================================================================
 # All files created should be group-writable:
 # umask 112
 
 # Default options:
-
-set help = 0
-set vb = 0
-set w = 10
+convert=0
+project=PSO
+help=0
+vb=0
+size=30
 
 # ------------------------------------------------------------------------------
 
-FINISH:
+# Getting user options
+if [ $# -eq 0 ]; then
+  help=1
+fi
+
+while (( "$#" )); do
+  tag=0
+
+  if [ "$1" == "-h" ]; then
+    help=1
+    tag=1
+  fi
+  if [ "$1" == "--help" ]; then
+    help=1
+    tag=1
+  fi
+
+  if [ "$1" == "-c" ]; then
+    convert=1
+    tag=1
+  fi
+  if [ "$1" == "--convert" ]; then
+    convert=1
+    tag=1
+  fi
+
+  if [ "$1" == "-p" ]; then
+    shift
+    project=$1
+    tag=1
+  fi
+  if [ "$1" == "--project" ]; then
+    shift
+    project=$1
+    tag=1
+  fi
+
+  if [ "$1" == "-s" ]; then
+    shift
+    size=$1
+    tag=1
+  fi
+  if [ "$1" == "--size" ]; then
+    shift
+    size=$1
+    tag=1
+  fi
+
+  if [ "$1" == "-v" ]; then
+    vb=1
+    tag=1
+  fi
+  if [ "$1" == "--verbose" ]; then
+    vb=1
+    tag=1
+  fi
+
+  if [ $tag -eq 0 ]; then
+    INPUT=$1 
+  fi
+  shift
+done
+
+if [ $help -eq 1 ]; then
+  echo "proto_start_project.bash coord.txt"
+  echo "coord.txt is either a two column 'ra dec' table"
+  echo "All columns n > 2 are ignored"
+  echo "-c --convert: convert to from 'hms+dms' format to decimal radec (required if you use hms table)"
+  echo "-h --help: displays this menu"
+  echo "-p --project: specifies project name (PSO)"
+  echo "-s --size: size of sky region (30 degrees)"
+  exit
+fi
+
+# Formatting project catalog
+mkdir -p $project
+MAINCAT=$project/$project.txt
+if [ -e $MAINCAT ]; then
+  echo "$MAINCAT already exists. Not remaking."
+else  
+  if [ $convert -eq 1 ]; then
+    if [ $vb -eq 1 ]; then echo "Converting hms to degrees."; fi
+    proto_hms2deg.py $INPUT
+    extension="${INPUT##*.}"
+    filename="${INPUT%.*}"
+    mv ${filename}_deg.$extension $project/$project.radec
+  else
+    cat $INPUT | awk '{ print $1, $2 }' > $project/$project.radec
+  fi
   
+  if [ $vb -eq 1 ]; then echo "Making $MAINCAT."; fi
+  proto_degname.py $project/$project.radec $project
+  cat $project/${project}_name.radec | awk '{ printf("%s %s %s '$project'_%i_%i\n",$1,$2,$3,$1-$1%'$size',$2-$2%'$size'-'$size'*($2<0)) }' > $project/${project}_dir.radec
+  proto_deg2hms.py $project/${project}.radec
+  rm $project/${project}_name.radec $project/$project.radec
+  proto_hmsname.py $project/${project}_hms.radec $project
+  paste $project/${project}_dir.radec $project/${project}_hms_name.radec > $MAINCAT
+  rm $project/${project}_dir.radec $project/${project}_hms_name.radec $project/${project}_hms.radec 
+fi
+
+HOMEDIR=`pwd`
+nlines=`cat $MAINCAT | wc -l`
+for num in `seq $nlines`; do
+  line=`cat $MAINCAT | head -n $num | tail -n 1`
+  radec=`echo $line | cut -d ' ' -f 1-2`
+  name=`echo $line | cut -d ' ' -f 3`
+  dir=`echo $line | cut -d ' ' -f 4`
+  OBJDIR=$project/$dir/$name
+  mkdir -p $OBJDIR
+  OBJRADEC=$OBJDIR/$name.radec
+  echo $radec > $OBJRADEC
+  cd $OBJDIR
+  pstamp.bash -a -f grizy -n 40 -o ${name}_V3 -s RINGS.V3 -P -W $name.radec
+  pstamp.bash -a -f grizy -n 50 -o ${name}_V0 -s RINGS.V0 -P -W $name.radec
+  cd $HOMEDIR 
+done
+
+
 #===============================================================================
