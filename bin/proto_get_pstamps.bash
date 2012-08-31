@@ -100,8 +100,10 @@ HOMEDIR2=`pwd`
 nlines=`cat $CAT | wc -l`
 for num in `seq $nlines`; do
   DIR=`cat $CAT | head -n  $num | tail -n 1 | awk '{ print $4"/"$3 }'`
+  ROOT=`cat $CAT | head -n  $num | tail -n 1 | awk '{ print $3 }'`
   cd $DIR
   for link in `cat *log`; do pstamp_retrieve.bash $link; done
+  proto_size_convert.py ${ROOT}_V0 
   cd $HOMEDIR2 
 done
 
