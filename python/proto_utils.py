@@ -352,11 +352,11 @@ def deg2hms(inname):
     outarray.append(("%02i" % int(ra))+':')
     ra=ra%1*60
     outarray[num]=outarray[num]+("%02i" % int(ra))+':'
-    ra="%.5f" % (ra%1*60)
+    ra="%6.3f" % (ra%1*60)
     outarray[num]=outarray[num]+ra+decmulti+("%02i" % int(dec))+':'
     dec=dec%1*60
     outarray[num]=outarray[num]+("%02i" % int(dec))+':'
-    dec="%.5f" % (dec%1*60)
+    dec="%6.3f" % (dec%1*60)
     outarray[num]=outarray[num]+dec
     file.write("%s\n" % outarray[num])
   file.close()
@@ -368,8 +368,8 @@ def degname(inname,project='PSO'):
   outname=inname.rpartition('.'); outname=outname[0]+'_name'+outname[1]+outname[2]
   file=open(outname,"w")
   for num in range(nlines):
-    ra="%.4f" % inarray[num][0]
-    dec="%.4f" % inarray[num][1]
+    ra="%08.4f" % inarray[num][0]
+    dec="%07.4f" % inarray[num][1]
     if float(dec) >= 0: 
       dec='+'+dec
     outarray.append(str(inarray[num][0])+' '+str(inarray[num][1])+' '+project+'J'+ra+dec)
