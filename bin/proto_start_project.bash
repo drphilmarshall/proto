@@ -50,8 +50,10 @@
 #
 # OPTIONAL INPUTS:
 #   -c            convert input from hms to radec (required if input is hms)
+#   -f            select filters that will be examined [grizy]
 #   -p            change project name [PSO] 
 #   -s            skypatch width in degrees [30]
+#   -w            stamp width in arcseconds [10]
 #
 # OUTPUTS:
 #
@@ -77,6 +79,10 @@ project=PSO
 help=0
 vb=0
 size=30
+filter=grizy
+stack=0
+all=0
+width=10
 
 # ------------------------------------------------------------------------------
 
@@ -103,6 +109,17 @@ while (( "$#" )); do
   fi
   if [ "$1" == "--convert" ]; then
     convert=1
+    tag=1
+  fi
+
+  if [ "$1" == "-f" ]; then
+    shift
+    filter=$1
+    tag=1
+  fi
+  if [ "$1" == "--filter" ]; then
+    shift
+    filter=$1
     tag=1
   fi
 
@@ -137,6 +154,39 @@ while (( "$#" )); do
     tag=1
   fi
 
+  if [ "$1" == "-w" ]; then
+    shift
+    width=$1
+    tag=1
+  fi
+  if [ "$1" == "--width" ]; then
+    shift
+    width=$1
+    tag=1
+  fi
+
+  if [ "$1" == "-A" ]; then
+    shift
+    all=1
+    tag=1
+  fi
+  if [ "$1" == "--All" ]; then
+    shift
+    all=1
+    tag=1
+  fi
+
+  if [ "$1" == "-S" ]; then
+    shift
+    stack=1
+    tag=1
+  fi
+  if [ "$1" == "--Stack" ]; then
+    shift
+    stack=1
+    tag=1
+  fi
+
   if [ $tag -eq 0 ]; then
     INPUT=$1 
   fi
@@ -148,9 +198,13 @@ if [ $help -eq 1 ]; then
   echo "coord.txt is either a two column 'ra dec' table"
   echo "All columns n > 2 are ignored"
   echo "-c --convert: convert to from 'hms+dms' format to decimal radec (required if you use hms table)"
+  echo "-f --filter: select filters that will be examined [grizy]"
   echo "-h --help: displays this menu"
   echo "-p --project: specifies project name (PSO)"
   echo "-s --size: size of sky region (30 degrees)"
+  echo "-w --width: stamp width in arcseconds [10]"
+  echo "-A --All: get all images of candidate"
+  echo "-S --Stacks: get stacked images of candidates"
   exit
 fi
 
@@ -192,8 +246,25 @@ for num in `seq $nlines`; do
   OBJRADEC=$OBJDIR/$name.radec
   echo $radec > $OBJRADEC
   cd $OBJDIR
-  pstamp.bash -a -f grizy -n 40 -o ${name}_V3 -s RINGS.V3 -P -W $name.radec
-  pstamp.bash -a -f grizy -n 50 -o ${name}_V0 -s RINGS.V0 -P -W $name.radec
+  w1=$((4 * $width))
+  w2=$((5 * $width))
+  STACKFITS=${name}_stack.fits
+  ALLFITS=${name}_V3.fits
+  if [ $stack ]; then 
+    if [ -e $STACKFITS ]; then 
+      echo "$STACKFITS already exists. Not remaking (or submitting new stamps)."	  
+    else  
+      pstamp.bash -a -f $filter -n $w1 -o ${name}_STACK -P -C -W -U -r LAP.ThreePi.20120706%final% -d stack -c  $name.radec
+    fi
+  fi
+
+  if [ $all ]; then
+    if [ -e $ALLFITS ]; then 
+      echo "$ALLFITS already exists. Not remaking (or submitting new stamps)."	  
+    else  
+      pstamp.bash -a -f $filter -n $w2 -o ${name}_V3 -P -C -W $name.radec
+    fi
+  fi
   cd $HOMEDIR 
 done
 

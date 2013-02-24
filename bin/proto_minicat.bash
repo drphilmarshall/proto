@@ -2,7 +2,7 @@
 
 # Setting defaults
 help=0
-db=ucal_magsqv
+db=ucal_magsqw
 format=fits
 output=minicat
 radius=1
