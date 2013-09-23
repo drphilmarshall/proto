@@ -1,15 +1,18 @@
-#!/usr/local/misc/python/Python-2.7.2/bin/python
+#! /usr/bin/env python
+##!/usr/local/misc/python/Python-2.7.2/bin/python
+
 import sys
 if len(sys.argv) != 4:
   print "proto_addstar.py image file format"
   print "Image is a (assumed PS1 postage stamp) fits image. File is a three column ra dec mag table."
-  print "format = 0, format is ra dec mag."
-  print "format = 1, format is dra ddec mag. dra and ddec are in arcseconds"
+  print " format = 0, format is ra dec mag."
+  print " format = 1, format is dra ddec mag. dra and ddec are in arcseconds"
+  print "Tables can have #-commented headers."
   sys.exit(1)
 
 import pyfits, numpy as np, os
 
-#Opeining fits file and getting necessary header values
+# Opening fits file and getting necessary header values
 
 infitsname=sys.argv[1]
 infits=pyfits.open(infitsname)
@@ -20,7 +23,7 @@ ny=infits[1].header['NAXIS2']; cy=0.5*(ny-1.)
 dx=infits[1].header['CDELT1']
 dy=infits[1].header['CDELT2']
 
-#Opening text table
+# Opening text table
 inname=sys.argv[2]
 intable=np.loadtxt(inname)
 
