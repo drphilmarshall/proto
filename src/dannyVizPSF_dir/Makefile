@@ -24,7 +24,7 @@ CC = gcc
 #Explicit Rules
 
 dannyVizPSF: ipp_psf_model.o array_functions.o  dannyVizPSF.o
-	$(CC)  $(LINK_FLAGS) $^ -o dannyVizPSF
+	$(CC)  $(LINK_FLAGS) $^ -o ../../bin/dannyVizPSF
 
 clean:
 	rm *.o
