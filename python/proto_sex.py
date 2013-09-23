@@ -148,6 +148,7 @@ def proto_sex(argv):
       catalog = paste_column(catalog,'mjd_obs',numpy.array([MJD]),fill='copy')
       catalog = paste_column(catalog,'filterid',numpy.array([filter]),fill='copy')
       catalog = paste_column(catalog,'pltscale',numpy.array([pltscale]),fill='copy')
+      catalog = paste_column(catalog,'psf_fwhm',numpy.array([FWHM]),fill='copy')
       catalog = paste_column(catalog,'posangle',numpy.array([0.0]),fill='copy')
       
       # Concatenate this catalog into the master catalog

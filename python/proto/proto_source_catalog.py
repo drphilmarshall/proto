@@ -12,6 +12,8 @@ import sys,numpy,atpy
 # Global variables:
 
 filterids = numpy.array(['g.00000','r.00000','i.00000','z.00000','y.00000'])
+# BUG: some files have g.0000 (4 zeros) as the filterid... 
+# WORKAROUND: always strip off zeros.
 bands = numpy.array(['g','r','i','z','y'])
 plotcolors = numpy.array(['blue','green','orange','red','magenta'])
 

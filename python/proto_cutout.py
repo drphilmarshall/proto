@@ -136,6 +136,9 @@ def proto_cutout(argv):
         
     # Check if sky position is in image:
     footprint = wcs.calcFootprint(hdr)
+    
+    print "footprint = ",footprint
+    
     if proto.point_inside_polygon(ra0,dec0,footprint):
       if vb: print "Object centre does lie in footprint of image"
 
@@ -214,7 +217,10 @@ def proto_cutout(argv):
         MJD = hdr['MJD-OBS']
       else :
         filter = hdr['FILTER']
-        MJD = hdr['MJD']
+        if hdr.has_key('MJD'):  
+            MJD = hdr['MJD']
+        else:
+            MJD = 99999.9
         
       MJDstring = "%.5f" % MJD
       
