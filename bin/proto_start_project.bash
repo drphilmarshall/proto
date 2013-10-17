@@ -64,6 +64,8 @@
 #    - very large searches should have initial catalogs in FITS table format - in which case this script
 #      should really be in python.
 #    - Does not add lsd catalogs
+#    - Header documentation is innacurate! Directory structure is totally 
+#      different to that which we had planned :-/ 
 # 
 # REVISION HISTORY:
 #   2012-07-04  started Marshall and Morganson (MPIA)

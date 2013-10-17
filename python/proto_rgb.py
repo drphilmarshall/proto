@@ -21,6 +21,7 @@ def proto_rgb(argv):
     Given a list of FITS files, produce an rgb image.
 
   COMMENTS
+    This script is deprecated: use HumVI compose instead! 
     
   USAGE
     proto_rgb.py [flags] [options]  image1 image2 ...
